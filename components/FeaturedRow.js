@@ -1,11 +1,32 @@
 /** @format */
 import { StyleSheet, Text, View, ScrollView } from "react-native";
-import React from "react";
+import { useEffect, useState } from "react";
 import { AntDesign } from "react-native-vector-icons";
 import tw from "twrnc";
 import RestaurantCard from "./RestaurantCard";
+import { client as sanityClient, urlFor } from "../sanity";
 
 const FeaturedRow = ({ id, title, description }) => {
+  const [restaurants, setRestaurants] = useState([]);
+
+  useEffect(() => {
+    sanityClient
+      .fetch(
+        `*[_type == "featured" && _id == $id]{
+  ...,
+  restaurants[]->{
+    ...,
+    dishes[]->,
+    type->{
+      name
+    }
+  },
+}[0]`,
+        { id }
+      )
+      .then((data) => setRestaurants(data?.restaurants));
+  }, []);
+
   return (
     <View style={tw`px-4`}>
       <View style={tw`flex-row items-center justify-between mt-4`}>
@@ -15,54 +36,21 @@ const FeaturedRow = ({ id, title, description }) => {
       <Text style={tw`text-gray-500 text-xs mb-2`}>{description}</Text>
       {/* scroll view cards */}
       <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-        <RestaurantCard
-          id="1234"
-          imgUrl="https://i0.wp.com/www.eatlanka.com/wp-content/uploads/2021/11/Chocolate-cake-recipe-1200a.jpg"
-          address="off new road landmark 11"
-          rating={4.3}
-          dishes={[]}
-          genre="Dinner"
-          lat={30}
-          lng={32}
-          short_description="short cake description"
-          title="Chocolate cakes"
-        />
-        <RestaurantCard
-          id="1234"
-          imgUrl="https://i0.wp.com/www.eatlanka.com/wp-content/uploads/2021/11/Chocolate-cake-recipe-1200a.jpg"
-          address="off new road landmark 11"
-          rating={4.3}
-          dishes={[]}
-          genre="Dinner"
-          lat={30}
-          lng={32}
-          short_description="short cake description"
-          title="Chocolate cake"
-        />
-        <RestaurantCard
-          id="1234"
-          imgUrl="https://i0.wp.com/www.eatlanka.com/wp-content/uploads/2021/11/Chocolate-cake-recipe-1200a.jpg"
-          address="off new road landmark 11"
-          rating={4.3}
-          dishes={[]}
-          genre="Dinner"
-          lat={30}
-          lng={32}
-          short_description="short cake description"
-          title="Chocolate cake"
-        />
-        <RestaurantCard
-          id="1234"
-          imgUrl="https://i0.wp.com/www.eatlanka.com/wp-content/uploads/2021/11/Chocolate-cake-recipe-1200a.jpg"
-          address="off new road landmark 11"
-          rating={4.3}
-          dishes={[]}
-          genre="Dinner"
-          lat={30}
-          lng={32}
-          short_description="short cake description"
-          title="Chocolate cake"
-        />
+        {restaurants?.map((restaurant) => (
+          <RestaurantCard
+            key={restaurant._id}
+            id={restaurant._id}
+            imgUrl={restaurant.image}
+            address={restaurant.address}
+            rating={4.3}
+            dishes={restaurant.dishes}
+            genre={restaurant.type?.name}
+            lat={restaurant.lat}
+            lng={restaurant.long}
+            short_description={restaurant.short_description}
+            title={restaurant.name}
+          />
+        ))}
       </ScrollView>
     </View>
   );

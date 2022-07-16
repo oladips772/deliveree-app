@@ -10,6 +10,6 @@ const client = sanityClient({
 });
 
 const builder = imageUrlBuilder(client);
-const urlFor = builder.image("image", { maxWidth: 300 });
+const urlFor = (source) => builder.image(source);
 
 export { client, urlFor };

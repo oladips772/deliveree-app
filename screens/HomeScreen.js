@@ -7,14 +7,32 @@ import {
   TextInput,
   ScrollView,
 } from "react-native";
-import React from "react";
+import { useState, useEffect } from "react";
 import HomeHeader from "../components/HomeHeader";
 import tw from "twrnc";
 import { Feather, Fontisto } from "react-native-vector-icons";
 import Categories from "../components/Categories";
 import FeaturedRow from "../components/FeaturedRow";
+import { client as sanityClient } from "../sanity";
 
 const HomeScreen = () => {
+  const [featuredCategories, setFeaturedCategories] = useState([]);
+
+  useEffect(() => {
+    sanityClient
+      .fetch(
+        `*[_type == "featured"]{
+  ...,
+  restaurants[]->{
+    ...,
+    dishes[]->
+  }
+}`
+      )
+      .then((data) => setFeaturedCategories(data));
+  }, []);
+
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="white" barStyle="dark-content" />
@@ -46,21 +64,14 @@ const HomeScreen = () => {
         {/* categories */}
         <Categories />
         {/* featured rows */}
-        <FeaturedRow
-          id="12"
-          title="Featured Rows"
-          description="Paid placements from our patners"
-        />
-        <FeaturedRow
-          id="123"
-          title="Tasty discounts"
-          description="Everyone's been enjoing these juicy discounts!"
-        />
-        <FeaturedRow
-          id="1234"
-          title="Offers near you"
-          description="Why not support your local restaurants tonight"
-        />
+        {featuredCategories?.map((categeory) => (
+          <FeaturedRow
+            key={categeory._id}
+            id={categeory._id}
+            title={categeory.name}
+            description={categeory.short_description}
+          />
+        ))}
       </ScrollView>
     </View>
   );
