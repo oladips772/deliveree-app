@@ -25,7 +25,7 @@ const FeaturedRow = ({ id, title, description }) => {
           lat={30}
           lng={32}
           short_description="short cake description"
-          title="Chocolate cake"
+          title="Chocolate cakes"
         />
         <RestaurantCard
           id="1234"
