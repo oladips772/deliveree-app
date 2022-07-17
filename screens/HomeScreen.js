@@ -32,7 +32,6 @@ const HomeScreen = () => {
       .then((data) => setFeaturedCategories(data));
   }, []);
 
-
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="white" barStyle="dark-content" />
